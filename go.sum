@@ -8,6 +8,10 @@ github.com/pentops/wireguard-config-go v0.0.0-20231121230909-1dbec489eea4 h1:xL7
 github.com/pentops/wireguard-config-go v0.0.0-20231121230909-1dbec489eea4/go.mod h1:JZfKdUkbjn5/k1uAjglprntgTH/Ij5nYw8zGGRFY3Z4=
 github.com/pentops/wireguard-config-go v0.0.0-20231122180506-ca3b591da0fb h1:xfIUJAFDWdO0hk8DHuR+0qu6898D+0+XGdJO3R+qlvs=
 github.com/pentops/wireguard-config-go v0.0.0-20231122180506-ca3b591da0fb/go.mod h1:JZfKdUkbjn5/k1uAjglprntgTH/Ij5nYw8zGGRFY3Z4=
+github.com/pentops/wireguard-config-go v0.0.0-20231122185140-424eb1c1f5d4 h1:njYcQhOXZctXvOGtqzc1NpL9eky7AltARzNaDLE37Ck=
+github.com/pentops/wireguard-config-go v0.0.0-20231122185140-424eb1c1f5d4/go.mod h1:JZfKdUkbjn5/k1uAjglprntgTH/Ij5nYw8zGGRFY3Z4=
+github.com/pentops/wireguard-config-go v0.0.0-20231122185718-48efe89b5636 h1:1w2lhUmfbnpZfwraDz4TZY54NkMDjymMQbL6l6BcaJc=
+github.com/pentops/wireguard-config-go v0.0.0-20231122185718-48efe89b5636/go.mod h1:JZfKdUkbjn5/k1uAjglprntgTH/Ij5nYw8zGGRFY3Z4=
 golang.org/x/crypto v0.8.0 h1:pd9TJtTueMTVQXzk8E2XESSMQDj/U7OUu0PqJqPXQjQ=
 golang.org/x/crypto v0.8.0/go.mod h1:mRqEX+O9/h5TFCrQhkgjo2yKi0yYA+9ecGkdQoHrywE=
 golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb h1:xIApU0ow1zwMa2uL1VDNeQlNVFTWMQxZUZCMDy0Q4Us=
