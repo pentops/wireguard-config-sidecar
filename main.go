@@ -19,6 +19,25 @@ import (
 )
 
 func main() {
+	args := os.Args[1:]
+
+	if len(args) == 0 {
+		args = append(args, "serve")
+	}
+
+	switch args[0] {
+	case "serve":
+		serveFile()
+	case "print":
+		printUsers()
+	default:
+		fmt.Println("unknown command")
+		os.Exit(1)
+	}
+
+}
+
+func printUsers() {
 	ctx := context.Background()
 
 	server, err := readConfig()
@@ -33,26 +52,54 @@ func main() {
 		os.Exit(1)
 	}
 
-	// write server config to file in specified location
-	err = os.WriteFile(filepath.Join("/etc/wireguard", "wg0.conf"), []byte(buildNodeFile(wgServerNode)), 0644)
+	for i, n := range wgUserNodes {
+		fmt.Printf("%s (%s)\n", *wgServerNode.Peers[i].Comment, n.Interface.Address)
+		fmt.Println("-----")
+		fmt.Println(buildUserNodeFile(n))
+		fmt.Println()
+	}
+}
+
+func serveFile() {
+	ctx := context.Background()
+
+	server, err := readConfig()
+	if err != nil {
+		log.WithError(ctx, err).Error("failed to read config")
+		os.Exit(1)
+	}
+
+	wgServerNode, _, err := buildNodes(server)
+	if err != nil {
+		log.WithError(ctx, err).Error("failed to build nodes")
+		os.Exit(1)
+	}
+
+	err = os.MkdirAll(server.ConfigPath, 0755)
+	if err != nil {
+		log.WithError(ctx, err).Error("failed to create config path")
+		os.Exit(1)
+	}
+
+	f, err := os.OpenFile(filepath.Join(server.ConfigPath, "wg0.conf"), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		log.WithError(ctx, err).Error("failed to open file")
+		os.Exit(1)
+	}
+
+	_, err = f.WriteString(buildServerNodeFile(wgServerNode))
 	if err != nil {
 		log.WithError(ctx, err).Error("failed to write server config")
 		os.Exit(1)
 	}
 
-	// hold process open at end unless errored
-
-	fmt.Println("Server")
-	fmt.Println(buildNodeFile(wgServerNode))
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-
-	fmt.Println("Users")
-	for _, n := range wgUserNodes {
-		fmt.Println(buildNodeFile(n))
-		fmt.Println()
+	err = f.Close()
+	if err != nil {
+		log.WithError(ctx, err).Error("failed to close file")
+		os.Exit(1)
 	}
+
+	<-ctx.Done()
 }
 
 func readConfig() (*wg_pb.Server, error) {
@@ -121,12 +168,16 @@ func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_p
 		if !user.Revoked {
 			ip := cidr.GetNth(idx+1).String() + "/32"
 
+			comment := user.Name
+
 			serverNode.Peers = append(serverNode.Peers, &wg_pb.Peer{
 				PublicKey:  user.PublicKey,
 				AllowedIps: ip,
+				Comment:    &comment,
 			})
 
 			dns := strings.Join(server.Dns, ",")
+			endpoint := fmt.Sprintf("%s:%d", server.Endpoint, server.ListenPort)
 
 			n := &wg_pb.Node{
 				Interface: &wg_pb.Interface{
@@ -136,7 +187,7 @@ func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_p
 					{
 						PublicKey:  pub,
 						AllowedIps: strings.Join(server.Routes.Accept, ", "),
-						Endpoint:   fmt.Sprintf("%s:%d", server.Endpoint, server.ListenPort),
+						Endpoint:   &endpoint,
 					},
 				},
 			}
@@ -195,7 +246,7 @@ func buildPostUp(pu *wg_pb.Routes) string {
 	return s.ToOneLine()
 }
 
-func buildNodeFile(n *wg_pb.Node) string {
+func buildServerNodeFile(n *wg_pb.Node) string {
 	c := node.NewBuilder()
 
 	c.AddLine("[Interface]")
@@ -232,10 +283,42 @@ func buildNodeFile(n *wg_pb.Node) string {
 
 	c.AddLine("")
 
+	for i, u := range n.Peers {
+		if u.Comment != nil {
+			c.AddLine(fmt.Sprintf("# %s", *u.Comment))
+		}
+
+		c.AddLine("[Peer]")
+		c.AddLine(fmt.Sprintf("PublicKey = %s", u.PublicKey))
+		c.AddLine(fmt.Sprintf("AllowedIPs = %s", u.AllowedIps))
+
+		if u.Endpoint != nil {
+			c.AddLine(fmt.Sprintf("Endpoint = %s", *u.Endpoint))
+		}
+
+		if i < len(n.Peers)-1 {
+			c.AddLine("")
+		}
+	}
+
+	return c.String()
+}
+
+func buildUserNodeFile(n *wg_pb.Node) string {
+	c := node.NewBuilder()
+
+	c.AddLine(fmt.Sprintf("Address = %s", n.Interface.Address))
+
+	if n.Interface.Dns != nil {
+		c.AddLine(fmt.Sprintf("DNS = %s", *n.Interface.Dns))
+	}
+
+	c.AddLine("")
+
 	for _, u := range n.Peers {
 		c.AddLine("[Peer]")
 		c.AddLine(fmt.Sprintf("PublicKey = %s", u.PublicKey))
-		c.AddLine(fmt.Sprintf("Endpoint = %s", u.Endpoint))
+		c.AddLine(fmt.Sprintf("Endpoint = %s", *u.Endpoint))
 		c.AddLine(fmt.Sprintf("AllowedIPs = %s", u.AllowedIps))
 		c.AddLine("")
 	}
