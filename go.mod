@@ -5,7 +5,7 @@ go 1.21.1
 toolchain go1.21.4
 
 require (
-	github.com/pentops/wireguard-config-go v0.0.0-20231122185718-48efe89b5636
+	github.com/pentops/wireguard-config-go v0.0.0-20231123002427-e413cc2cf732
 	gopkg.in/yaml.v3 v3.0.1
 )
 

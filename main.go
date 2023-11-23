@@ -186,7 +186,7 @@ func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_p
 				Peers: []*wg_pb.Peer{
 					{
 						PublicKey:  pub,
-						AllowedIps: strings.Join(server.Routes.Accept, ", "),
+						AllowedIps: strings.Join(server.AllowedIps, ", "),
 						Endpoint:   &endpoint,
 					},
 				},
