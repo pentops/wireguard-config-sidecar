@@ -1,18 +1,12 @@
-module github.com/interxfi/wireguard
+module github.com/pentops/wireguard-config-sidecar
 
-go 1.21.1
-
-toolchain go1.21.4
+go 1.22.0
 
 require (
-	github.com/pentops/wireguard-config-go v0.0.0-20231123002427-e413cc2cf732
-	gopkg.in/yaml.v3 v3.0.1
-)
-
-require (
-	github.com/pentops/log.go v0.0.0-20230815045424-6ebbd9ef2576
+	github.com/pentops/log.go v0.0.0-20231218074934-67aedcab3fa4
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20230429144221-925a1e7659e6
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
