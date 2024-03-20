@@ -13,7 +13,7 @@ message Server {
   int64           listen_port = 6;
   Routes          routes      = 7;
   repeated string allowed_ips = 8;
-  repeated User   users       = 9;
+  repeated Device devices     = 9;
 }
 
 message PrivateKey {
@@ -26,7 +26,7 @@ message Routes {
   repeated string accept = 1;
 }
 
-message User {
+message Device {
   string name       = 1;
   string public_key = 2;
   bool   revoked    = 3;
