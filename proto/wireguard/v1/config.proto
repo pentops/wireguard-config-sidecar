@@ -12,7 +12,6 @@ message Server {
   repeated string dns         = 5;
   int64           listen_port = 6;
   Routes          routes      = 7;
-  repeated string allowed_ips = 8;
   repeated Device devices     = 9;
 }
 
@@ -23,7 +22,8 @@ message PrivateKey {
 }
 
 message Routes {
-  repeated string accept = 1;
+  repeated string relay  = 1;
+  repeated string accept = 2;
 }
 
 message Device {
