@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/interxfi/wireguard/cidr"
-	"github.com/interxfi/wireguard/node"
-	"github.com/interxfi/wireguard/script"
 	"github.com/pentops/log.go/log"
-	wg_pb "github.com/pentops/wireguard-config-go/wireguard/v1"
+	"github.com/pentops/wireguard-config-sidecar/cidr"
+	wg_pb "github.com/pentops/wireguard-config-sidecar/gen/wireguard/v1"
+	"github.com/pentops/wireguard-config-sidecar/node"
+	"github.com/pentops/wireguard-config-sidecar/script"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"google.golang.org/protobuf/encoding/protojson"
 	"gopkg.in/yaml.v3"
@@ -133,7 +133,7 @@ func readConfig() (*wg_pb.Server, error) {
 	return &server, nil
 }
 
-func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_pb.Node, err error) {
+func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, deviceNodes []*wg_pb.Node, err error) {
 	pk, err := getPrivateKey(server.PrivateKey)
 	if err != nil {
 		return nil, nil, err
@@ -162,16 +162,16 @@ func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_p
 		},
 	}
 
-	userNodes = make([]*wg_pb.Node, 0, len(server.Users))
+	deviceNodes = make([]*wg_pb.Node, 0, len(server.Devices))
 
-	for idx, user := range server.Users {
-		if !user.Revoked {
+	for idx, device := range server.Devices {
+		if !device.Revoked {
 			ip := cidr.GetNth(idx+1).String() + "/32"
 
-			comment := user.Name
+			comment := device.Name
 
 			serverNode.Peers = append(serverNode.Peers, &wg_pb.Peer{
-				PublicKey:  user.PublicKey,
+				PublicKey:  device.PublicKey,
 				AllowedIps: ip,
 				Comment:    &comment,
 			})
@@ -186,7 +186,7 @@ func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_p
 				Peers: []*wg_pb.Peer{
 					{
 						PublicKey:  pub,
-						AllowedIps: strings.Join(server.AllowedIps, ", "),
+						AllowedIps: strings.Join(server.Routes.Relay, ", "),
 						Endpoint:   &endpoint,
 					},
 				},
@@ -196,11 +196,11 @@ func buildNodes(server *wg_pb.Server) (serverNode *wg_pb.Node, userNodes []*wg_p
 				n.Interface.Dns = &dns
 			}
 
-			userNodes = append(userNodes, n)
+			deviceNodes = append(deviceNodes, n)
 		}
 	}
 
-	return serverNode, userNodes, nil
+	return serverNode, deviceNodes, nil
 }
 
 func getPrivateKey(pk *wg_pb.PrivateKey) (string, error) {

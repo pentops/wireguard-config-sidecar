@@ -1,0 +1,9 @@
+version: v1
+name: buf.build/pentops/wireguard-config
+
+deps:
+  - buf.build/bufbuild/protovalidate
+
+lint:
+  use:
+    - DEFAULT
