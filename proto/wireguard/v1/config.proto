@@ -12,7 +12,8 @@ message Server {
   repeated string dns         = 5;
   int64           listen_port = 6;
   Routes          routes      = 7;
-  repeated User   users       = 8;
+  repeated string allowed_ips = 8;
+  repeated User   users       = 9;
 }
 
 message PrivateKey {
@@ -49,8 +50,10 @@ message Interface {
 }
 
 message Peer {
-  string public_key    = 1;
-  string preshared_key = 2;
-  string allowed_ips   = 3;
-  string endpoint      = 4;
+  string public_key  = 1;
+  string allowed_ips = 2;
+
+  optional string comment       = 3;
+  optional string preshared_key = 4;
+  optional string endpoint      = 5;
 }
